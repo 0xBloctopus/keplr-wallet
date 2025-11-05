@@ -143,6 +143,30 @@ function setOutputHash(root, hash) {
       ${inputs.map((i) => path.join(baseProtoPath, i))} \
       ${thirdPartyInputs.map((i) => path.join(thirdPartyProtoPath, i))}`;
 
+    const descriptorPath = path.join(outDir, "google/protobuf/descriptor.ts");
+    if (fs.existsSync(descriptorPath)) {
+      let descriptorSource = fs.readFileSync(descriptorPath, "utf8");
+      if (!descriptorSource.includes("MessageTypeDefinition<")) {
+        descriptorSource = descriptorSource.replace(
+          'import _m0 from "protobufjs/minimal";\n\n',
+          'import _m0 from "protobufjs/minimal";\n\ntype MessageTypeDefinition<T> = {\n  encode(message: T, writer?: _m0.Writer): _m0.Writer;\n  decode(input: _m0.Reader | Uint8Array, length?: number): T;\n  fromJSON(object: any): T;\n  toJSON(message: T): unknown;\n  fromPartial(object: DeepPartial<T>): T;\n};\n\n'
+        );
+        descriptorSource = descriptorSource.replace(
+          "export const FileDescriptorSet = {",
+          "export const FileDescriptorSet: MessageTypeDefinition<FileDescriptorSet> = {"
+        );
+        descriptorSource = descriptorSource.replace(
+          "export const FileDescriptorProto = {",
+          "export const FileDescriptorProto: MessageTypeDefinition<FileDescriptorProto> = {"
+        );
+        descriptorSource = descriptorSource.replace(
+          "export const DescriptorProto = {",
+          "export const DescriptorProto: MessageTypeDefinition<DescriptorProto> = {"
+        );
+        fs.writeFileSync(descriptorPath, descriptorSource);
+      }
+    }
+
     $.verbose = false;
 
     // Move tsconfig.json to package root
