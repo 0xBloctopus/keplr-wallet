@@ -517,19 +517,54 @@ export class ChainsService {
   ): Promise<ChainInfo> {
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
-    const res = await simpleFetch<
-      (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
-    >(
-      this.communityChainInfoRepo.alternativeURL
-        ? this.communityChainInfoRepo.alternativeURL
-            .replace("{chain_identifier}", chainIdentifier)
-            .replace("/cosmos/", isEvmOnlyChain ? "/evm/" : "/cosmos/")
-        : `https://raw.githubusercontent.com/${
-            this.communityChainInfoRepo.organizationName
-          }/${this.communityChainInfoRepo.repoName}/${
-            this.communityChainInfoRepo.branchName
-          }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`
-    );
+    const fallbackUrl = `https://raw.githubusercontent.com/${
+      this.communityChainInfoRepo.organizationName
+    }/${this.communityChainInfoRepo.repoName}/${
+      this.communityChainInfoRepo.branchName
+    }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`;
+
+    const alternativeUrl = this.communityChainInfoRepo.alternativeURL
+      ? this.communityChainInfoRepo.alternativeURL
+          .replace(
+            "{category}",
+            isEvmOnlyChain ? "evm" : "cosmos"
+          )
+          .replace("{chain_identifier}", chainIdentifier)
+          // backwards compatibility with older templates
+          .replace("/cosmos/", isEvmOnlyChain ? "/evm/" : "/cosmos/")
+      : undefined;
+
+    let res: {
+      data: (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo;
+    };
+
+    try {
+      res = await simpleFetch<
+        (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
+      >(alternativeUrl ?? fallbackUrl);
+    } catch (e) {
+      if (!alternativeUrl) {
+        throw e;
+      }
+      console.warn(
+        "Failed to load chain info from alternative registry, falling back to GitHub",
+        alternativeUrl,
+        e
+      );
+      try {
+        res = await simpleFetch<
+          (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
+        >(fallbackUrl);
+      } catch (fallbackError) {
+        console.warn(
+          "Failed to load chain info from fallback registry",
+          fallbackUrl,
+          fallbackError
+        );
+        // Return the existing embedded chain info so the extension can continue
+        return this.getChainInfoOrThrow(chainId) as ChainInfo;
+      }
+    }
     const chainInfo: ChainInfo =
       "rest" in res.data && !isEvmOnlyChain
         ? res.data

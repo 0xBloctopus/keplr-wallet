@@ -18,6 +18,14 @@ export class ObservableSimpleQueryImpl<
     }
     return true;
   }
+
+  protected override getCacheKey(): string {
+    if (!this.baseURL) {
+      return `simple-query-${this.url}`;
+    }
+
+    return super.getCacheKey();
+  }
 }
 
 export class ObservableSimpleQuery extends ObservableQueryMap<ObservableQuery> {

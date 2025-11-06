@@ -4,6 +4,10 @@ import { FiatCurrency } from "@keplr-wallet/types";
 export const HelpDeskUrl = "https://help.keplr.app";
 export const TermsOfUseUrl = "https://terms-of-use.keplr.app";
 
+export const ConfigServerURL =
+  process.env["KEPLR_EXT_CONFIG_SERVER"] ||
+  "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws";
+
 export const CoinGeckoAPIEndPoint =
   process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] ||
   "https://api.coingecko.com/api/v3";
@@ -15,7 +19,7 @@ export const CoinGeckoCoinDataByTokenAddress =
 
 // 일단 CoinGecko API와 같은 base url을 사용함
 export const SkipTokenInfoBaseURL =
-  process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] || "";
+  process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] || CoinGeckoAPIEndPoint;
 export const SkipTokenInfoAPIURI =
   process.env["KEPLR_EXT_SKIP_TOKEN_INFO_API_URI"] ||
   "/coingecko-token-info/skip/assets/{chainId}/{coinMinimalDenom}";

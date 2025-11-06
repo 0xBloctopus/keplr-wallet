@@ -13,6 +13,7 @@ import { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Body1 } from "../../components/typography";
+import { ConfigServerURL } from "../../config.ui";
 
 export const HistoryDetailPage: FunctionComponent = observer(() => {
   const { queriesStore } = useStore();
@@ -36,7 +37,7 @@ export const HistoryDetailPage: FunctionComponent = observer(() => {
   const queryExplorer = queriesStore.simpleQuery.queryGet<{
     link: string;
   }>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    ConfigServerURL,
     `/tx-history/explorer/${ChainIdHelper.parse(chainId || "").identifier}`
   );
 

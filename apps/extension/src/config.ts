@@ -3918,9 +3918,9 @@ export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
   branchName: "main",
-  alternativeURL: process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
-    ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
-    : undefined,
+  alternativeURL:
+    process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"] ||
+    "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws/{category}/{chain_identifier}.json",
 };
 
 export const TokenContractListURL =

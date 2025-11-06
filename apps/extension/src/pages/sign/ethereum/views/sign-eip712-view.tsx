@@ -43,6 +43,7 @@ import { CurrencyImageFallback } from "../../../../components/image";
 import { Skeleton } from "../../../../components/skeleton";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Tooltip } from "../../../../components/tooltip";
+import { ConfigServerURL } from "../../../../config.ui";
 
 export const EthereumSignEIP712View: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -414,10 +415,7 @@ const PermitIntentView: FunctionComponent<{
 
     const queryExplorer = queriesStore.simpleQuery.queryGet<{
       link: string;
-    }>(
-      process.env["KEPLR_EXT_CONFIG_SERVER"],
-      `/tx-history/explorer/${chainInfo.chainId}`
-    );
+    }>(ConfigServerURL, `/tx-history/explorer/${chainInfo.chainId}`);
 
     const explorerUrl = queryExplorer.response?.data.link || "";
 

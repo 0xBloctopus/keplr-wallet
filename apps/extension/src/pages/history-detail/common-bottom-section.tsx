@@ -24,6 +24,7 @@ import lottie, { AnimationItem } from "lottie-web";
 import AnimCheckLight from "../../public/assets/lottie/register/check-circle-icon-light.json";
 import AnimCheck from "../../public/assets/lottie/register/check-circle-icon.json";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ConfigServerURL } from "../../config.ui";
 
 export const HistoryDetailCommonBottomSection: FunctionComponent<{
   msg: MsgHistory;
@@ -133,10 +134,10 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
 
   const queryExplorer = queriesStore.simpleQuery.queryGet<{
     link: string;
-  }>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
-    `/tx-history/explorer/${ChainIdHelper.parse(msg.chainId).identifier}`
-  );
+      }>(
+        ConfigServerURL,
+        `/tx-history/explorer/${ChainIdHelper.parse(msg.chainId).identifier}`
+      );
 
   const explorerUrl = queryExplorer.response?.data.link || "";
 

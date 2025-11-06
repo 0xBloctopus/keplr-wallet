@@ -2,7 +2,29 @@ import { SimpleFetchRequestOptions, SimpleFetchResponse } from "./types";
 import { SimpleFetchError } from "./error";
 
 export function makeURL(baseURL: string, url: string): string {
-  const baseURLInstance = new URL(baseURL);
+  if (!baseURL || baseURL.trim().length === 0) {
+    if (!url) {
+      console.error(
+        "makeURL received invalid base URL", baseURL, "with empty url"
+      );
+      throw new Error("Base URL must not be empty");
+    }
+
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) {
+      return removeLastSlashIfIs(url);
+    }
+
+    // treat url as path; return as-is
+    return removeLastSlashIfIs(url);
+  }
+
+  let baseURLInstance: URL;
+  try {
+    baseURLInstance = new URL(baseURL);
+  } catch (e) {
+    console.error("makeURL received invalid base URL", baseURL);
+    throw e;
+  }
   baseURL = removeLastSlashIfIs(baseURLInstance.origin);
   url =
     removeLastSlashIfIs(baseURLInstance.pathname) +

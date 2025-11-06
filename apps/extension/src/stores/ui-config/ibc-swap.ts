@@ -4,6 +4,7 @@ import { ChainStore } from "../chain";
 import { computedFn } from "mobx-utils";
 import { IChainInfoImpl, IQueriesStore } from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
+import { ConfigServerURL } from "../../config.ui";
 
 export class IBCSwapConfig {
   protected readonly kvStore: KVStore;
@@ -95,10 +96,7 @@ export class IBCSwapConfig {
     autorun(() => {
       const res = this.queriesStore.simpleQuery.queryGet<{
         disabled?: boolean;
-      }>(
-        process.env["KEPLR_EXT_CONFIG_SERVER"],
-        "/celestia-ibc-disable/config.json"
-      );
+      }>(ConfigServerURL, "/celestia-ibc-disable/config.json");
       if (res.response?.data["disabled"] === true) {
         runInAction(() => {
           this._celestiaDisabled = true;

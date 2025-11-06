@@ -14,6 +14,7 @@ import {
 } from "@keplr-wallet/hooks-internal";
 import { SwapAssetInfo } from "./components/swap-asset-info";
 import { SwapFeeInfo } from "./components/swap-fee-info";
+import { ConfigServerURL } from "../../config.ui";
 import { Gutter } from "../../components/gutter";
 import { ColorPalette } from "../../styles";
 import { ExtensionKVStore } from "@keplr-wallet/common";
@@ -217,7 +218,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       feeBps?: number;
       coins?: string[];
     };
-  }>(process.env["KEPLR_EXT_CONFIG_SERVER"], "/swap-fee/info-v2.json");
+  }>(ConfigServerURL, "/swap-fee/info-v2.json");
   useEffect(() => {
     const defaultSwapFeeBps = SwapFeeBps.value;
     if (querySwapFeeBps.response) {

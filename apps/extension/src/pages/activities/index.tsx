@@ -3,6 +3,7 @@ import { Box } from "../../components/box";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { ConfigServerURL } from "../../config.ui";
 import { usePaginatedCursorQuery } from "../main/token-detail/hook";
 import { ResMsgsHistory } from "../main/token-detail/types";
 import { PaginationLimit, Relations } from "../main/token-detail/constants";
@@ -102,7 +103,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
   const [selectedKey, setSelectedKey] = useState<string>("__all__");
 
   const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    ConfigServerURL,
     "/tx-history/supports"
   );
 

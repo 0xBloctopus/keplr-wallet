@@ -7,6 +7,41 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const fs = require("fs");
+const testWalletConfigPath = path.resolve(
+  __dirname,
+  "test-wallet.config.json"
+);
+
+const loadTestWalletConfig = () => {
+  if (!fs.existsSync(testWalletConfigPath)) {
+    return {};
+  }
+
+  try {
+    const raw = fs.readFileSync(testWalletConfigPath, "utf-8");
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn(
+      `Failed to parse test wallet config at ${testWalletConfigPath}:`,
+      e
+    );
+    return {};
+  }
+};
+
+const testWalletConfig = loadTestWalletConfig();
+const bip44FromConfig = testWalletConfig.bip44 ?? {};
+
+const testWalletEnvDefaults = {
+  KEPLR_TEST_MNEMONIC: testWalletConfig.mnemonic ?? "",
+  KEPLR_TEST_PASSWORD: testWalletConfig.password ?? "",
+  KEPLR_TEST_ACCOUNT_NAME: testWalletConfig.accountName ?? "Test Wallet",
+  KEPLR_TEST_BIP44_ACCOUNT: String(bip44FromConfig.account ?? 0),
+  KEPLR_TEST_BIP44_CHANGE: String(bip44FromConfig.change ?? 0),
+  KEPLR_TEST_BIP44_ADDRESS_INDEX: String(
+    bip44FromConfig.addressIndex ?? 0
+  ),
+};
 
 const isBuildManifestV2 = process.env.BUILD_MANIFEST_V2 === "true";
 
@@ -178,7 +213,8 @@ module.exports = {
       KEPLR_EXT_MOONPAY_API_KEY: "",
       KEPLR_EXT_SWAPPED_API_KEY: "",
       KEPLR_EXT_SWAPPED_API_SECRET: "",
-      KEPLR_EXT_CHAIN_REGISTRY_URL: "",
+      KEPLR_EXT_CHAIN_REGISTRY_URL:
+        "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws/{category}/{chain_identifier}.json",
       KEPLR_EXT_GOOGLE_MEASUREMENT_ID: "",
       KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT: "",
       KEPLR_EXT_AMPLITUDE_API_KEY: "",
@@ -186,7 +222,8 @@ module.exports = {
       KEPLR_EXT_TOKEN_FACTORY_URI: "",
       KEPLR_EXT_TX_HISTORY_BASE_URL: "",
       KEPLR_EXT_TX_HISTORY_TEST_BASE_URL: "https://satellite-develop.keplr.app",
-      KEPLR_EXT_CONFIG_SERVER: "",
+      KEPLR_EXT_CONFIG_SERVER:
+        "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
       WC_PROJECT_ID: "",
       KEPLR_EXT_EIP6963_PROVIDER_INFO_NAME: "Keplr",
       KEPLR_EXT_EIP6963_PROVIDER_INFO_RDNS: "app.keplr",
@@ -201,6 +238,7 @@ module.exports = {
       KEPLR_EXT_TX_CODEC_BASE_URL: "",
       KEPLR_EXT_TOPUP_BASE_URL: "",
       KEPLR_EXT_TOPUP_API_KEY: "",
+      ...testWalletEnvDefaults,
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

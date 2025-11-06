@@ -369,6 +369,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
       return;
     }
 
+    if (!this.baseURL || this.baseURL.trim().length === 0) {
+      if (this._isFetching) {
+        this._isFetching = false;
+      }
+      return;
+    }
+
     if (!this.canFetch()) {
       if (this._isFetching) {
         this._isFetching = false;
@@ -766,10 +773,21 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
   }
 
   protected getCacheKey(): string {
+    if (!this.baseURL || this.baseURL.trim().length === 0) {
+      console.warn("ObservableQuery missing base URL", {
+        queryType: this.constructor.name,
+        url: this.url,
+      });
+      return `${this.constructor.name}-${this.url}`;
+    }
     try {
       return makeURL(this.baseURL, this.url);
     } catch (e) {
-      console.log("Failed to make URL", this.baseURL, this.url, e);
+      console.error(
+        "Failed to make URL",
+        { baseURL: this.baseURL, url: this.url, queryType: this.constructor.name },
+        e
+      );
       // just return random.
       const random = new Uint8Array(32);
       crypto.getRandomValues(random);

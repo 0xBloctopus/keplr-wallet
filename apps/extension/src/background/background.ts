@@ -15,6 +15,8 @@ import {
 } from "@keplr-wallet/router-extension";
 import { ExtensionKVStore, isServiceWorker } from "@keplr-wallet/common";
 import { init } from "@keplr-wallet/background";
+import type { VaultService } from "@keplr-wallet/background";
+import testWalletConfig from "../../test-wallet.config.json";
 import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -161,8 +163,96 @@ const { initFn, keyRingService, analyticsService } = init(
     if (isServiceWorker()) {
       await vaultService.unlockWithSessionPasswordIfPossible();
     }
+
+    await ensureTestWalletPreloaded(vaultService);
   }
 );
+
+const parseBip44Component = (value: string | undefined, fallback: number) => {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+};
+
+type TestWalletConfig = {
+  mnemonic?: string;
+  password?: string;
+  accountName?: string;
+  bip44?: {
+    account?: number;
+    change?: number;
+    addressIndex?: number;
+  };
+};
+
+const ensureTestWalletPreloaded = async (
+  vaultService: VaultService
+): Promise<void> => {
+  const env: Record<string, string | undefined> =
+    typeof process !== "undefined" && process?.env
+      ? (process.env as Record<string, string | undefined>)
+      : {};
+  const config: TestWalletConfig = (testWalletConfig ?? {}) as TestWalletConfig;
+
+  const mnemonic = (
+    env["KEPLR_TEST_MNEMONIC"] ?? config.mnemonic ?? ""
+  ).trim();
+  if (!mnemonic) {
+    return;
+  }
+
+  const passwordRaw = env["KEPLR_TEST_PASSWORD"] ?? config.password ?? "";
+  const password = passwordRaw.trim() || "testpassword";
+  const accountName =
+    (env["KEPLR_TEST_ACCOUNT_NAME"] ?? config.accountName ?? "Test Wallet")
+      .trim() ||
+    "Test Wallet";
+
+  const bip44 = {
+    account: parseBip44Component(
+      env["KEPLR_TEST_BIP44_ACCOUNT"] ?? config.bip44?.account?.toString(),
+      config.bip44?.account ?? 0
+    ),
+    change: parseBip44Component(
+      env["KEPLR_TEST_BIP44_CHANGE"] ?? config.bip44?.change?.toString(),
+      config.bip44?.change ?? 0
+    ),
+    addressIndex: parseBip44Component(
+      env["KEPLR_TEST_BIP44_ADDRESS_INDEX"] ??
+        config.bip44?.addressIndex?.toString(),
+      config.bip44?.addressIndex ?? 0
+    ),
+  };
+
+  const hasAnyVault = keyRingService.getKeyRingVaults().length > 0;
+
+  if (!hasAnyVault) {
+    try {
+      await keyRingService.createMnemonicKeyRing(
+        mnemonic,
+        bip44,
+        accountName,
+        password,
+        { __auto_created: true }
+      );
+    } catch (e) {
+      console.error("Failed to auto-create Keplr test wallet", e);
+      return;
+    }
+  }
+
+  if (vaultService.isLocked) {
+    try {
+      await vaultService.unlock(password);
+    } catch (e) {
+      if (!(e instanceof Error) || e.message !== "Vault is already unlocked") {
+        console.warn("Failed to unlock Keplr test wallet", e);
+      }
+    }
+  }
+};
 
 router.listen(BACKGROUND_PORT, initFn).then(() => {
   // Open register popup on installed

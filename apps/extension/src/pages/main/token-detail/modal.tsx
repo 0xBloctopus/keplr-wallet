@@ -23,6 +23,7 @@ import { RenderMessages } from "./messages";
 import { Modal } from "../../../components/modal";
 import { BuyCryptoModal } from "../components";
 import { useBuySupportServiceInfos } from "../../../hooks/use-buy-support-service-infos";
+import { ConfigServerURL } from "../../../config.ui";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { CircleButton } from "./circle-button";
 import { AddressChip, QRCodeChip } from "./address-chip";
@@ -189,7 +190,7 @@ export const TokenDetailModal: FunctionComponent<{
   const navigate = useNavigate();
 
   const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    ConfigServerURL,
     "/tx-history/supports"
   );
 

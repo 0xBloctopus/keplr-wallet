@@ -8,6 +8,7 @@ import {
 } from "mobx";
 import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { ConfigServerURL } from "../../config.ui";
 import Joi from "joi";
 import { GetSidePanelIsSupportedMsg } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -105,10 +106,7 @@ export class ChangelogConfig {
     try {
       const res = await simpleFetch<{
         versions: VersionHistory[];
-      }>(
-        process.env["KEPLR_EXT_CONFIG_SERVER"],
-        `/changelog/${lastVersion}/${currentVersion}`
-      );
+      }>(ConfigServerURL, `/changelog/${lastVersion}/${currentVersion}`);
 
       const validated = await Schema.validateAsync(res.data);
 

@@ -1,5 +1,8 @@
 import { AppCurrency } from "@keplr-wallet/types";
-import { FiatOnRampServiceInfo } from "../config.ui";
+import {
+  ConfigServerURL,
+  FiatOnRampServiceInfo,
+} from "../config.ui";
 import { useStore } from "../stores";
 import { createHmac } from "crypto";
 
@@ -243,7 +246,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
   );
   const moonpaySignResult = moonpayServiceInfo?.buyUrl
     ? queriesStore.simpleQuery.queryGet<string>(
-        process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+        ConfigServerURL,
         `/api/moonpay-sign?url=${encodeURIComponent(moonpayServiceInfo.buyUrl)}`
       )
     : undefined;
@@ -288,7 +291,7 @@ export const useBuySupportServiceInfos = (selectedTokenInfo?: {
                   const transakSignResult = queriesStore.simpleQuery.queryGet<{
                     widgetUrl: string;
                   }>(
-                    process.env["KEPLR_EXT_CONFIG_SERVER"] || "",
+                    ConfigServerURL,
                     `api/transak${buyUrl.replace(serviceInfo.buyOrigin, "")}`
                   );
                   await transakSignResult.waitFreshResponse();

@@ -1,0 +1,33 @@
+{
+  "hygiene_cooldowns": {
+    "cleanup_until": "0001-01-01T00:00:00Z",
+    "engine_restart_until": "0001-01-01T00:00:00Z",
+    "thornode_health_until": "0001-01-01T00:00:00Z"
+  },
+  "hygiene_enclave_stats": {
+    "active": 0,
+    "last_list_at": "0001-01-01T00:00:00Z",
+    "recent": null,
+    "stopped": 0,
+    "total": 0
+  },
+  "hygiene_last_operation": {
+    "Action": "",
+    "At": "0001-01-01T00:00:00Z",
+    "Duration": 0,
+    "Family": "",
+    "Status": 0,
+    "Tool": ""
+  },
+  "hygiene_thornode": {
+    "block_height": 0,
+    "catching_up": false,
+    "head_lag_sec": 0,
+    "healthy": false,
+    "last_check_at": "2025-11-06T11:56:12.451425Z",
+    "last_error": "probe failed: no enclave/service in cache - health check skipped",
+    "peer_count": 0,
+    "status": "unknown"
+  },
+  "hygiene_updated_at": "2025-11-05T15:13:43.695757Z"
+}
